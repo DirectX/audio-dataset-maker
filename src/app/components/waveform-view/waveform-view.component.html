@@ -1,0 +1,9 @@
+<mat-toolbar class="material-wavesurfer" [ngClass]="{'playing':playing}">
+  <button mat-icon-button (click)="playPause()">
+    <mat-icon>{{ playing ? 'pause' : 'play_arrow' }}</mat-icon>
+  </button>
+  <div class="ws">
+    <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+    <div #wavesurfer></div>
+  </div>
+</mat-toolbar>

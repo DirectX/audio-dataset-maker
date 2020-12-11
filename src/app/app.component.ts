@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'audio-dataset-maker';
+  title = 'Audio Daataset Maker';
 }

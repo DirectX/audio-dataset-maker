@@ -20,10 +20,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'audio-dataset-maker'`, () => {
+  it(`should have as title 'Audio Dataset Maker'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('audio-dataset-maker');
+    expect(app.title).toEqual('Audio Dataset Maker');
   });
 
   it('should render title', () => {
