@@ -1,12 +1,10 @@
 :host::ng-deep.material-wavesurfer {
   padding-right: 0;
   padding-left: 0;
-  height: 40px;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
+  height: 60px;
 
   .mat-icon {
-    color: #00f;
+    color: rgb(18, 81, 126);
   }
   
   .ws {
@@ -26,7 +24,7 @@
       .mat-progress-bar-fill {
         transition: none;
         &::after {
-          background-color: rgba(#00f, 0.2);
+          background-color: rgba(#3af, 0.2);
         }
       }
 
@@ -42,7 +40,7 @@
 
   &.playing {
     .mat-icon {
-      color: #00f;
+      color: rgb(18, 81, 126);
     }
   }
 }

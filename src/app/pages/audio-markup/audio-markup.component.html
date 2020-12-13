@@ -1,0 +1,7 @@
+<mat-card>
+  <h1 class="mat-h1">Audio Dataset Markup</h1>
+  <p>Catalog URL: {{ catalogUrl }} <span class="ml-3"><button mat-raised-button (click)="openDialog()">Select...</button></span></p>
+  <mat-card class="mb-3" *ngFor="let file of files">
+    <app-waveform-view [url]="file.url"></app-waveform-view>
+  </mat-card>
+</mat-card>

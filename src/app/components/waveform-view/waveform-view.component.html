@@ -1,4 +1,4 @@
-<mat-toolbar class="material-wavesurfer" [ngClass]="{'playing':playing}">
+<mat-toolbar class="material-wavesurfer" [class.playing]="playing">
   <button mat-icon-button (click)="playPause()">
     <mat-icon>{{ playing ? 'pause' : 'play_arrow' }}</mat-icon>
   </button>

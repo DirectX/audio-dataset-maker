@@ -7,14 +7,27 @@ import * as WaveSurfer from 'wavesurfer.js';
   styleUrls: ['./waveform-view.component.scss']
 })
 export class WaveformViewComponent implements AfterViewInit {
-    private wavesurfer: WaveSurfer;
-    @Input() url: string = '';
-    @ViewChild('wavesurfer') ws: ElementRef;
-    @Input() waveColor = '#0F0';
-    @Input() progressColor = '#00F';
-    @Input() cursorColor = '#CCC';
-    progress = 0;
-    playing = false;
+    public progress = 0;
+    public playing = false;
+    private wavesurfer!: WaveSurfer;
+
+    private _url = '';
+    @Input()
+    set url(url: string){
+      this._url = url;
+      if (this.url) {
+        this.wavesurfer?.load(this.url);
+      }
+    }
+    get url(): string{
+      return this._url;
+    }
+
+    @Input() waveColor = '#3c3';
+    @Input() progressColor = '#3ad';
+    @Input() cursorColor = '#ccc';
+
+    @ViewChild('wavesurfer') private ws!: ElementRef;
 
     constructor(private ref: ChangeDetectorRef) {
     }
@@ -29,9 +42,8 @@ export class WaveformViewComponent implements AfterViewInit {
           waveColor: this.waveColor,
           progressColor: this.progressColor,
           cursorColor: this.cursorColor,
-          height: 40
+          height: 60
         });
-        this.wavesurfer.load(this.url);
         this.wavesurfer.on('play', () => {
           this.playing = true;
         });
@@ -48,9 +60,11 @@ export class WaveformViewComponent implements AfterViewInit {
           this.progress = this.wavesurfer.getCurrentTime() / this.wavesurfer.getDuration() * 100;
           this.ref.markForCheck();
         });
+        if (this.url) {
+          this.wavesurfer?.load(this.url);
+        }
       });
     }
-
 
     playPause() {
       if (this.wavesurfer && this.wavesurfer.isReady) {

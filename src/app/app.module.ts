@@ -10,23 +10,27 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { LayoutModule } from '@angular/cdk/layout';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { NavigationComponent } from './components/navigation/navigation.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
+import { MatInputModule } from '@angular/material/input';
+import { MatDialogModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WaveformViewComponent } from './components/waveform-view/waveform-view.component';
+import { AudioMarkupComponent, LoadCatalogDialog } from './pages/audio-markup/audio-markup.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
-    NavigationComponent,
-    WaveformViewComponent
+    WaveformViewComponent,
+    LoadCatalogDialog,
+    AudioMarkupComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    FormsModule,
     BrowserAnimationsModule,
     MatSliderModule,
     MatGridListModule,
@@ -37,9 +41,17 @@ import { WaveformViewComponent } from './components/waveform-view/waveform-view.
     LayoutModule,
     MatToolbarModule,
     MatSidenavModule,
-    MatListModule
+    MatListModule,
+    MatInputModule,
+    MatProgressBarModule,
+    MatDialogModule
   ],
-  providers: [],
+  entryComponents: [
+    LoadCatalogDialog
+  ],
+  providers: [
+    { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { hasBackdrop: false }}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
