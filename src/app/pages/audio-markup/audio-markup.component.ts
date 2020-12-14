@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
@@ -18,10 +19,13 @@ export class AudioMarkupComponent implements OnInit {
   catalogUrl!: string;
   files: FileInfo[] = [];
 
-  constructor(public dialog: MatDialog) {}
+  constructor(
+    public dialog: MatDialog,
+    private http: HttpClient) {}
 
   ngOnInit(): void {
     this.catalogUrl = localStorage.getItem('catalogUrl') || '';
+    this.loadCatalog();
   }
 
   openDialog(): void {
@@ -34,8 +38,17 @@ export class AudioMarkupComponent implements OnInit {
       if (result) {
         this.catalogUrl = result;
         localStorage.setItem('catalogUrl', this.catalogUrl);
+        this.loadCatalog();
       }
     });
+  }
+
+  loadCatalog(): void {
+    if (this.catalogUrl) {
+      this.http.get<string>(this.catalogUrl, {}).subscribe((res: string) => {
+        console.log(res);
+      }, err => console.log(err) );
+    }
   }
 }
 
