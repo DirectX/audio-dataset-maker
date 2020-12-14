@@ -7,6 +7,7 @@ export interface DialogData {
 }
 
 export interface FileInfo {
+  id: string;
   url: string;
 }
 
@@ -45,8 +46,21 @@ export class AudioMarkupComponent implements OnInit {
 
   loadCatalog(): void {
     if (this.catalogUrl) {
-      this.http.get<string>(this.catalogUrl, {}).subscribe((res: string) => {
-        console.log(res);
+      this.files = [];
+      this.http.get<string>(`${this.catalogUrl}/index.txt`, { responseType: 'text' as 'json' }).subscribe((res: string) => {
+        if (res && res.length) {
+          const lines = res.split('\n');
+
+          for (const line of lines) {
+            const filename = line.substr(2);
+            const id = filename.split('_')[0];
+
+            this.files.push({
+              id,
+              url: `${this.catalogUrl}/${filename}`
+            } as FileInfo);
+          }
+        }
       }, err => console.log(err) );
     }
   }
