@@ -1,15 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-
-export interface DialogData {
-  catalogUrl: string;
-}
-
-export interface FileInfo {
-  id: string;
-  url: string;
-}
+import { DialogData, FileInfo } from 'src/app/models/models';
 
 @Component({
   selector: 'app-audio-markup',
@@ -30,7 +22,7 @@ export class AudioMarkupComponent implements OnInit {
   }
 
   openDialog(): void {
-    const dialogRef = this.dialog.open(LoadCatalogDialog, {
+    const dialogRef = this.dialog.open(LoadCatalogDialogComponent, {
       width: '250px',
       data: { catalogUrl: this.catalogUrl }
     });
@@ -49,7 +41,7 @@ export class AudioMarkupComponent implements OnInit {
       this.files = [];
       this.http.get<string>(`${this.catalogUrl}/index.txt`, { responseType: 'text' as 'json' }).subscribe((res: string) => {
         if (res && res.length) {
-          const lines = res.split('\n');
+          const lines = res.split('\n').slice(0, 5);
 
           for (const line of lines) {
             const filename = line.substr(2);
@@ -82,9 +74,9 @@ export class AudioMarkupComponent implements OnInit {
     <button mat-button [mat-dialog-close]="data.catalogUrl">Save</button>
   </div>`,
 })
-export class LoadCatalogDialog {
+export class LoadCatalogDialogComponent {
   constructor(
-    public dialogRef: MatDialogRef<LoadCatalogDialog>,
+    public dialogRef: MatDialogRef<LoadCatalogDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData) {}
 
   onSave(): void {

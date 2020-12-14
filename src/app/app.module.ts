@@ -19,13 +19,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { WaveformViewComponent } from './components/waveform-view/waveform-view.component';
-import { AudioMarkupComponent, LoadCatalogDialog } from './pages/audio-markup/audio-markup.component';
+import { AudioMarkupComponent, LoadCatalogDialogComponent } from './pages/audio-markup/audio-markup.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     WaveformViewComponent,
-    LoadCatalogDialog,
+    LoadCatalogDialogComponent,
     AudioMarkupComponent
   ],
   imports: [
@@ -49,7 +49,7 @@ import { AudioMarkupComponent, LoadCatalogDialog } from './pages/audio-markup/au
     MatDialogModule
   ],
   entryComponents: [
-    LoadCatalogDialog
+    LoadCatalogDialogComponent
   ],
   providers: [
     { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { hasBackdrop: false }}
