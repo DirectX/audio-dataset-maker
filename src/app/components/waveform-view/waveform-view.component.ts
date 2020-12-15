@@ -15,7 +15,7 @@ export class WaveformViewComponent implements AfterViewInit {
   public playing = false;
   private wavesurfer!: WaveSurfer;
   private region: any = null;
-  private selection!: AudioSelection;
+  public selection!: AudioSelection;
   private duration = 0.0;
 
   public downloadLink: DownloadLink | undefined = undefined;
@@ -55,7 +55,8 @@ export class WaveformViewComponent implements AfterViewInit {
           WaveSurferRegions.create({
           }),
           SpectrogramPlugin.create({
-            container: this.spectrum.nativeElement
+            container: this.spectrum.nativeElement,
+            fftSamples: 256
           }),
         ]
       });
@@ -112,39 +113,7 @@ export class WaveformViewComponent implements AfterViewInit {
           }
         }
 
-        ctx.drawImage(backCanvas, 10, 10);
-
         this.downloadLink = new DownloadLink(`${this._id}.png`, backCanvas.toDataURL());
-
-        // this.wavesurfer.spectrogram.getFrequencies((frequencies: Uint8Array[]) => {
-        //   const spectrumSampleCount = frequencies.length;
-
-        //   const startIndex = Math.floor(normalizedStartPos * spectrumSampleCount);
-        //   const endIndex = Math.floor(normalizedEndPos * spectrumSampleCount);
-
-        //   const selectedSpectrumSamples = frequencies.slice(startIndex, endIndex);
-
-        //   console.log(`Spectrum samples: ${selectedSpectrumSamples.length} out of ${spectrumSampleCount}`);
-        //   console.log(selectedSpectrumSamples[0]);
-
-        //   const ctx: CanvasRenderingContext2D = this.spectrum.nativeElement.querySelector('canvas').getContext('2d');
-
-        //   const backCanvas: HTMLCanvasElement = document.createElement('canvas');
-        //   backCanvas.width = selectedSpectrumSamples.length;
-        //   backCanvas.height = 256;
-        //   const backCtx: CanvasRenderingContext2D = backCanvas.getContext('2d') as CanvasRenderingContext2D;
-
-        //   for (let i = 0; i < selectedSpectrumSamples.length; i++) {
-        //     const h = selectedSpectrumSamples[i].length;
-        //     for (let j = 0; j < h; j++) {
-        //       const c = 255 - selectedSpectrumSamples[i][j];
-        //       backCtx.fillStyle = `rgb(${c}, ${c}, ${c})`;
-        //       backCtx.fillRect(i, h - j, 1, 1);
-        //     }
-        //   }
-
-        //   ctx.drawImage(backCanvas, 0, 0);
-        // });
       });
       this.wavesurfer.enableDragSelection({});
       if (this._url) {

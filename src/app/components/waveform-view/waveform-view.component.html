@@ -8,6 +8,10 @@
     <div #spectrum></div>
   </div>
 </mat-toolbar>
-<p>Selection: from {{ selection?.start || 0.0 | number:'0.00' }} s to {{ selection?.end || 0 | number:'0.00' }} s
-  <span class="ml-3" *ngIf="downloadLink"><a mat-raised-button color="primary" [href]="downloadLink.href" [download]="downloadLink.download">Save</a></span>
-</p>
+<div class="mt-3" fxLayout="row" fxLayoutAlign="end center">
+  <img [src]="downloadLink?.href" alt="" *ngIf="downloadLink?.href">
+  <span *ngIf="downloadLink">
+    <span class="ml-3"><a mat-raised-button color="accent" [href]="downloadLink?.href" [download]="'positive_' + downloadLink?.download">Positive</a></span>
+    <span class="ml-3"><a mat-raised-button color="primary" [href]="downloadLink?.href" [download]="'negative_' + downloadLink?.download">Negative</a></span>
+  </span>
+</div>

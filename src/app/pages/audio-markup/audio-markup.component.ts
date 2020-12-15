@@ -62,6 +62,8 @@ export class AudioMarkupComponent implements OnInit {
             } as FileInfo);
           }
 
+          this.files = this.files.filter(file => file.id).sort((a, b) => a.id.localeCompare(b.id));
+          
           this.filterFiles();
         }
       }, err => console.log(err) );

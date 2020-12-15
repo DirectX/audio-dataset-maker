@@ -21,6 +21,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { WaveformViewComponent } from './components/waveform-view/waveform-view.component';
 import { AudioMarkupComponent, LoadCatalogDialogComponent } from './pages/audio-markup/audio-markup.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { AudioMarkupComponent, LoadCatalogDialogComponent } from './pages/audio-
     MatProgressBarModule,
     MatDialogModule,
     MatPaginatorModule,
+    FlexLayoutModule
   ],
   entryComponents: [
     LoadCatalogDialogComponent
