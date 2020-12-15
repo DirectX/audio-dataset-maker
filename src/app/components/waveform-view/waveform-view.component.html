@@ -5,6 +5,9 @@
   <div class="ws">
     <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
     <div #wavesurfer></div>
+    <div #spectrum></div>
   </div>
 </mat-toolbar>
-<p>Selection: from {{ selection?.start || 0.0 | number:'0.00' }} s to {{ selection?.end || 0 | number:'0.00' }} s</p>
+<p>Selection: from {{ selection?.start || 0.0 | number:'0.00' }} s to {{ selection?.end || 0 | number:'0.00' }} s
+  <span class="ml-3"><button mat-button (click)="playPause()">Save</button></span>
+</p>

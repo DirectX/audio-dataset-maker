@@ -1,7 +1,8 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { AudioSelection } from 'src/app/models/models';
 import * as WaveSurfer from 'wavesurfer.js';
-import * as WaveSurferRegions from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
+import WaveSurferRegions from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
+import SpectrogramPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.spectrogram.min.js';
 
 @Component({
   selector: 'app-waveform-view',
@@ -14,6 +15,7 @@ export class WaveformViewComponent implements AfterViewInit {
   private wavesurfer!: WaveSurfer;
   private region: any = null;
   private selection!: AudioSelection;
+  private duration = 0.0;
 
   // tslint:disable-next-line:variable-name
   private _url = '';
@@ -33,11 +35,12 @@ export class WaveformViewComponent implements AfterViewInit {
   @Input() cursorColor = '#ccc';
 
   @ViewChild('wavesurfer') private ws!: ElementRef;
+  @ViewChild('spectrum') private spectrum!: ElementRef;
 
   constructor(private ref: ChangeDetectorRef) {
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     requestAnimationFrame(() => {
       this.wavesurfer = WaveSurfer.create({
         container: this.ws.nativeElement,
@@ -45,21 +48,17 @@ export class WaveformViewComponent implements AfterViewInit {
         progressColor: this.progressColor,
         cursorColor: this.cursorColor,
         height: 60,
+        normalize: true,
         plugins: [
           WaveSurferRegions.create({
-            // regions: [
-            //   {
-            //     start: 1,
-            //     end: 3,
-            //     color: 'hsla(400, 100%, 30%, 0.5)'
-            //   }, {
-            //     start: 5,
-            //     end: 7,
-            //     color: 'hsla(200, 50%, 70%, 0.4)'
-            //   }
-            // ]
-          })
+          }),
+          SpectrogramPlugin.create({
+            container: this.spectrum.nativeElement
+          }),
         ]
+      });
+      this.wavesurfer.on('ready', () => {
+        this.duration = this.wavesurfer.getDuration();
       });
       this.wavesurfer.on('play', () => {
         this.playing = true;
@@ -89,7 +88,39 @@ export class WaveformViewComponent implements AfterViewInit {
         } else {
           this.region = region;
         }
-        this.selection = new AudioSelection(region.start, region.end);
+        this.selection = new AudioSelection(region.start, region.end); // Can be saved for later trimming
+
+        this.wavesurfer.spectrogram.getFrequencies((frequencies: Uint8Array[]) => {
+          const normalizedStartPos = this.selection.start / this.duration;
+          const normalizedEndPos = this.selection.end / this.duration;
+          const spectrumSampleCount = frequencies.length;
+
+          const startIndex = Math.floor(normalizedStartPos * spectrumSampleCount);
+          const endIndex = Math.floor(normalizedEndPos * spectrumSampleCount);
+
+          const selectedSpectrumSamples = frequencies.slice(startIndex, endIndex);
+
+          console.log(`Spectrum samples: ${selectedSpectrumSamples.length} out of ${spectrumSampleCount}`);
+          console.log(selectedSpectrumSamples[0]);
+
+          const ctx: CanvasRenderingContext2D = this.spectrum.nativeElement.querySelector('canvas').getContext('2d');
+
+          const backCanvas: HTMLCanvasElement = document.createElement('canvas');
+          backCanvas.width = selectedSpectrumSamples.length;
+          backCanvas.height = 256;
+          const backCtx: CanvasRenderingContext2D = backCanvas.getContext('2d') as CanvasRenderingContext2D;
+
+          for (let i = 0; i < selectedSpectrumSamples.length; i++) {
+            const h = selectedSpectrumSamples[i].length;
+            for (let j = 0; j < h; j++) {
+              const c = 255 - selectedSpectrumSamples[i][j];
+              backCtx.fillStyle = `rgb(${c}, ${c}, ${c})`;
+              backCtx.fillRect(i, h - j, 1, 1);
+            }
+          }
+
+          ctx.drawImage(backCanvas, 0, 0);
+        });
       });
       this.wavesurfer.enableDragSelection({});
       if (this.url) {
@@ -98,8 +129,15 @@ export class WaveformViewComponent implements AfterViewInit {
     });
   }
 
-  playPause() {
+  playPause(): void {
     if (this.wavesurfer && this.wavesurfer.isReady) {
+      if (!this.wavesurfer.isPlaying()) {
+        if (this.region) {
+          const seekPos = this.region.start / this.wavesurfer.getDuration();
+          this.wavesurfer.seekTo(seekPos);
+        }
+      }
+
       this.wavesurfer.playPause();
     }
   }
