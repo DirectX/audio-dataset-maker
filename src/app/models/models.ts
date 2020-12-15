@@ -13,3 +13,9 @@ export class AudioSelection {
     public start: number,
     public end: number) { }
 }
+
+export class DownloadLink {
+  constructor (
+    public download: string,
+    public href: string) {}
+}

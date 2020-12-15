@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { PageEvent } from '@angular/material/paginator';
 import { DialogData, FileInfo } from 'src/app/models/models';
 
 @Component({
@@ -11,6 +12,14 @@ import { DialogData, FileInfo } from 'src/app/models/models';
 export class AudioMarkupComponent implements OnInit {
   catalogUrl!: string;
   files: FileInfo[] = [];
+  displayFiles: FileInfo[] = [];
+
+  public pageSize = 5;
+  public pageIndex = 0;
+
+  get pageCount(): number {
+    return Math.ceil(this.files.length / this.pageSize);
+  }
 
   constructor(
     public dialog: MatDialog,
@@ -41,7 +50,7 @@ export class AudioMarkupComponent implements OnInit {
       this.files = [];
       this.http.get<string>(`${this.catalogUrl}/index.txt`, { responseType: 'text' as 'json' }).subscribe((res: string) => {
         if (res && res.length) {
-          const lines = res.split('\n').slice(0, 5);
+          const lines = res.split('\n');
 
           for (const line of lines) {
             const filename = line.substr(2);
@@ -52,9 +61,21 @@ export class AudioMarkupComponent implements OnInit {
               url: `${this.catalogUrl}/${filename}`
             } as FileInfo);
           }
+
+          this.filterFiles();
         }
       }, err => console.log(err) );
     }
+  }
+
+  onPageChanged($event: PageEvent): void {
+    this.pageIndex = $event.pageIndex;
+    this.pageSize = $event.pageSize;
+    this.filterFiles();
+  }
+
+  filterFiles(): void {
+    this.displayFiles = this.files.slice((this.pageIndex) * this.pageSize, (this.pageIndex + 1) * this.pageSize);
   }
 }
 

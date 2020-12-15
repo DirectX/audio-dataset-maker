@@ -1,8 +1,9 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { AudioSelection } from 'src/app/models/models';
+import { AudioSelection, DownloadLink, FileInfo } from 'src/app/models/models';
 import * as WaveSurfer from 'wavesurfer.js';
 import WaveSurferRegions from 'wavesurfer.js/dist/plugin/wavesurfer.regions.js';
 import SpectrogramPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.spectrogram.min.js';
+import { getSpectrum } from './fft';
 
 @Component({
   selector: 'app-waveform-view',
@@ -17,17 +18,18 @@ export class WaveformViewComponent implements AfterViewInit {
   private selection!: AudioSelection;
   private duration = 0.0;
 
+  public downloadLink: DownloadLink | undefined = undefined;
+
   // tslint:disable-next-line:variable-name
   private _url = '';
+  private _id = '';
   @Input()
-  set url(url: string) {
-    this._url = url;
-    if (this.url) {
-      this.wavesurfer?.load(this.url);
+  set file(file: FileInfo) {
+    this._id = file.id;
+    this._url = file.url;
+    if (this._url) {
+      this.wavesurfer?.load(this._url);
     }
-  }
-  get url(): string {
-    return this._url;
   }
 
   @Input() waveColor = '#3c3';
@@ -82,49 +84,71 @@ export class WaveformViewComponent implements AfterViewInit {
         }
         this.region = region;
       });
-      this.wavesurfer.on('region-update-end', (region: any) => {
+      this.wavesurfer.on('region-update-end', async (region: any) => {
         if (this.region && this.region.id !== region.id) {
           this.region.remove();
         } else {
           this.region = region;
         }
         this.selection = new AudioSelection(region.start, region.end); // Can be saved for later trimming
+        const normalizedStartPos = this.selection.start / this.duration;
+        const normalizedEndPos = this.selection.end / this.duration;
+        const buffer = (this.wavesurfer.backend as any).buffer;
 
-        this.wavesurfer.spectrogram.getFrequencies((frequencies: Uint8Array[]) => {
-          const normalizedStartPos = this.selection.start / this.duration;
-          const normalizedEndPos = this.selection.end / this.duration;
-          const spectrumSampleCount = frequencies.length;
+        const spectrum = await getSpectrum(buffer, 256, normalizedStartPos, normalizedEndPos);
 
-          const startIndex = Math.floor(normalizedStartPos * spectrumSampleCount);
-          const endIndex = Math.floor(normalizedEndPos * spectrumSampleCount);
+        const ctx: CanvasRenderingContext2D = this.spectrum.nativeElement.querySelector('canvas').getContext('2d');
+        const backCanvas: HTMLCanvasElement = document.createElement('canvas');
+        backCanvas.width = spectrum.length;
+        backCanvas.height = spectrum[0].length;
+        const backCtx: CanvasRenderingContext2D = backCanvas.getContext('2d') as CanvasRenderingContext2D;
 
-          const selectedSpectrumSamples = frequencies.slice(startIndex, endIndex);
-
-          console.log(`Spectrum samples: ${selectedSpectrumSamples.length} out of ${spectrumSampleCount}`);
-          console.log(selectedSpectrumSamples[0]);
-
-          const ctx: CanvasRenderingContext2D = this.spectrum.nativeElement.querySelector('canvas').getContext('2d');
-
-          const backCanvas: HTMLCanvasElement = document.createElement('canvas');
-          backCanvas.width = selectedSpectrumSamples.length;
-          backCanvas.height = 256;
-          const backCtx: CanvasRenderingContext2D = backCanvas.getContext('2d') as CanvasRenderingContext2D;
-
-          for (let i = 0; i < selectedSpectrumSamples.length; i++) {
-            const h = selectedSpectrumSamples[i].length;
-            for (let j = 0; j < h; j++) {
-              const c = 255 - selectedSpectrumSamples[i][j];
-              backCtx.fillStyle = `rgb(${c}, ${c}, ${c})`;
-              backCtx.fillRect(i, h - j, 1, 1);
-            }
+        for (let i = 0; i < spectrum.length; i++) {
+          const h = spectrum[i].length;
+          for (let j = 0; j < h; j++) {
+            const c = spectrum[i][j];
+            backCtx.fillStyle = `rgb(${c}, ${c}, ${c})`;
+            backCtx.fillRect(i, h - j - 1, 1, 1);
           }
+        }
 
-          ctx.drawImage(backCanvas, 0, 0);
-        });
+        ctx.drawImage(backCanvas, 10, 10);
+
+        this.downloadLink = new DownloadLink(`${this._id}.png`, backCanvas.toDataURL());
+
+        // this.wavesurfer.spectrogram.getFrequencies((frequencies: Uint8Array[]) => {
+        //   const spectrumSampleCount = frequencies.length;
+
+        //   const startIndex = Math.floor(normalizedStartPos * spectrumSampleCount);
+        //   const endIndex = Math.floor(normalizedEndPos * spectrumSampleCount);
+
+        //   const selectedSpectrumSamples = frequencies.slice(startIndex, endIndex);
+
+        //   console.log(`Spectrum samples: ${selectedSpectrumSamples.length} out of ${spectrumSampleCount}`);
+        //   console.log(selectedSpectrumSamples[0]);
+
+        //   const ctx: CanvasRenderingContext2D = this.spectrum.nativeElement.querySelector('canvas').getContext('2d');
+
+        //   const backCanvas: HTMLCanvasElement = document.createElement('canvas');
+        //   backCanvas.width = selectedSpectrumSamples.length;
+        //   backCanvas.height = 256;
+        //   const backCtx: CanvasRenderingContext2D = backCanvas.getContext('2d') as CanvasRenderingContext2D;
+
+        //   for (let i = 0; i < selectedSpectrumSamples.length; i++) {
+        //     const h = selectedSpectrumSamples[i].length;
+        //     for (let j = 0; j < h; j++) {
+        //       const c = 255 - selectedSpectrumSamples[i][j];
+        //       backCtx.fillStyle = `rgb(${c}, ${c}, ${c})`;
+        //       backCtx.fillRect(i, h - j, 1, 1);
+        //     }
+        //   }
+
+        //   ctx.drawImage(backCanvas, 0, 0);
+        // });
       });
       this.wavesurfer.enableDragSelection({});
-      if (this.url) {
-        this.wavesurfer?.load(this.url);
+      if (this._url) {
+        this.wavesurfer?.load(this._url);
       }
     });
   }

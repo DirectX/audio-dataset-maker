@@ -9,5 +9,5 @@
   </div>
 </mat-toolbar>
 <p>Selection: from {{ selection?.start || 0.0 | number:'0.00' }} s to {{ selection?.end || 0 | number:'0.00' }} s
-  <span class="ml-3"><button mat-button (click)="playPause()">Save</button></span>
+  <span class="ml-3" *ngIf="downloadLink"><a mat-raised-button color="primary" [href]="downloadLink.href" [download]="downloadLink.download">Save</a></span>
 </p>
