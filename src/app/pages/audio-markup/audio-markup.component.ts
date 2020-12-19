@@ -78,6 +78,7 @@ export class AudioMarkupComponent implements OnInit {
 
   filterFiles(): void {
     this.displayFiles = this.files.slice((this.pageIndex) * this.pageSize, (this.pageIndex + 1) * this.pageSize);
+    console.log(this.displayFiles.length);
   }
 }
 
